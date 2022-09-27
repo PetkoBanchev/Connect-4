@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject fieldBlock;
     [SerializeField] private GameObject pluck;
 
-    private bool isPlayer1Turn = true;
+    private Pluck.PluckOwner currentPlayer = Pluck.PluckOwner.Player1;
 
     [SerializeField] private Text playerTurnText; 
     // Start is called before the first frame update
@@ -47,18 +47,11 @@ public class GameManager : MonoBehaviour
             Pluck _pluck = field[x, y].GetComponent<Pluck>();
             _pluck.x = x;
             _pluck.y = y;
+            _pluck.SetOwner(currentPlayer);
 
-            if (isPlayer1Turn)
-            {
-                _pluck.SetOwner(Pluck.PluckOwner.Player1);
-            }
-            else
-            {
-                _pluck.SetOwner(Pluck.PluckOwner.Player2);
-            }
             columnFillCounter[x]++;
-            isPlayer1Turn = !isPlayer1Turn;
-            ChangePlayerTurnText(isPlayer1Turn);
+            changeCurrentPlayer();
+            ChangePlayerTurnText();
         }
     }
 
@@ -69,12 +62,12 @@ public class GameManager : MonoBehaviour
             columnFillCounter[i] = 0;
         }
 
-        isPlayer1Turn = true;
+        currentPlayer = Pluck.PluckOwner.Player1;
     }
 
-    private void ChangePlayerTurnText(bool _isPlayer1)
+    private void ChangePlayerTurnText()
     {
-        if (_isPlayer1)
+        if (currentPlayer == Pluck.PluckOwner.Player1)
         {
             playerTurnText.text = "Player 1";
             playerTurnText.color = Color.red;
@@ -83,6 +76,18 @@ public class GameManager : MonoBehaviour
         {
             playerTurnText.text = "Player 2";
             playerTurnText.color = Color.yellow;
+        }
+    }
+
+    private void changeCurrentPlayer()
+    {
+        if (currentPlayer == Pluck.PluckOwner.Player1)
+        {
+            currentPlayer = Pluck.PluckOwner.Player2;
+        }
+        else
+        {
+            currentPlayer = Pluck.PluckOwner.Player1;
         }
     }
 
