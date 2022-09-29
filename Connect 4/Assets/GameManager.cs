@@ -98,25 +98,20 @@ public class GameManager : MonoBehaviour
         List<Pluck>[] axes = new List<Pluck>[4];
         Pluck _currentPluck = field[x, y].GetComponent<Pluck>();
 
-        for (int a = 0; a < axes.Length; a++)
-        {
-            Debug.Log(axes[a]);
-        }
-
         //List<Pluck> horizontal; (-1, 0) && (1, 0)  - 0
         //List<Pluck> vertical;   (0, -1) && (0, 1)  - 1
         //List<Pluck> ascending;  (-1, -1) && (1, 1) - 2
         //List<Pluck> descending; (-1, 1) && (1, -1) - 3
 
-        for (var i = -1; i < 2; i++)
+        for (var i = -1; i < 2; i++) // loops through neigbours (y axis)
         {
-            for(var j = -1; j < 2; j++)
+            for(var j = -1; j < 2; j++)  // loops through neigbours (x axis)
             {
-                if((i == 0 && j == 0) || (x + j) < 0 || (x + j) > 6 || (y + i) < 0 || (y + i) > 5)
+                if((i == 0 && j == 0) || (x + j) < 0 || (x + j) > 6 || (y + i) < 0 || (y + i) > 5) //excludes _currentPluck and indexes outside array bounds
                 {
                     continue;
                 }
-                if (field[x+j, y+i] != null && field[x + j, y + i].GetComponent<Pluck>().owner == currentPlayer)
+                if (field[x+j, y+i] != null && field[x + j, y + i].GetComponent<Pluck>().owner == currentPlayer) //check if neighbour belongs to current player
                 {
                     Pluck _neighbourPluck = field[x + j, y + i].GetComponent<Pluck>();
                     switch ((j, i))
@@ -127,7 +122,6 @@ public class GameManager : MonoBehaviour
                             if(axes[0] == null)
                                 axes[0] = new List<Pluck>();
                             axes[0].Add(_neighbourPluck);
-                            axes[0].Add(_currentPluck);
                             break;
 
                         case (0, -1):
@@ -136,7 +130,6 @@ public class GameManager : MonoBehaviour
                             if (axes[1] == null)
                                 axes[1] = new List<Pluck>();
                             axes[1].Add(_neighbourPluck);
-                            axes[1].Add(_currentPluck);
                             break;
 
                         case (-1, -1):
@@ -145,7 +138,6 @@ public class GameManager : MonoBehaviour
                             if (axes[2] == null)
                                 axes[2] = new List<Pluck>();
                             axes[2].Add(_neighbourPluck);
-                            axes[2].Add(_currentPluck);
                             break;
 
                         case (-1, 1):
@@ -154,33 +146,121 @@ public class GameManager : MonoBehaviour
                             if (axes[3] == null)
                                 axes[3] = new List<Pluck>();
                             axes[3].Add(_neighbourPluck);
-                            axes[3].Add(_currentPluck);
                             break;
                     }
                 }
             }
         }
 
-        for(int a = 0; a < axes.Length; a++)
+        for(int k = 0; k < axes.Length; k++)
         {
-            if (axes[a] != null)
+            if (axes[k] != null)
             {
-                switch (a)
+                int x_Neighbour = axes[k][0].x;
+                int y_Neighbour= axes[k][0].y;
+
+                bool end_Positive = false;
+                bool end_Negative = false;
+                switch (k)
                 {
                     //Horizontal
                     case 0:
-                        int y0= axes[0][0].y;
-                        if (field[axes[0][0].x + 1, y0].owner == currentPlayer)
-                            axes[0].Add(field[axes[0][0].x + 1, y0]);
+
+                        for(int l = 1; l< 4; l++)
+                        {
+                            int x_AxisNeigbhourPositive = x_Neighbour + l;
+                            int x_AxisNeigbhourNegative = x_Neighbour - l;
+
+                            int y_AxisNeigbhourPositive = y_Neighbour + l;
+                            int y_AxisNeigbhourNegative = y_Neighbour - l;
+
+                            if (field[x_Neighbour + l, y_Neighbour] != null && field[x_Neighbour + l, y_Neighbour].owner == currentPlayer && end_Positive != false) // right (1,0)
+                                axes[k].Add(field[x_Neighbour + l, y_Neighbour]);
+                            else
+                                end_Positive = true;
+
+                            if (field[x_Neighbour - l, y_Neighbour] != null && field[x_Neighbour - l, y_Neighbour].owner == currentPlayer && end_Negative != false) // left (-1,0)
+                                axes[k].Add(field[x_Neighbour - l, y_Neighbour]);
+                            else
+                                end_Negative = true;
+
+                            if(end_Positive == true && end_Negative == true)
+                                break;
+
+                            if (axes[k].Count == 4)
+                            {
+                                Debug.Log(currentPlayer + " is the winner!");
+                            }
+                        }
                         break;
                     //Vertical
                     case 1:
+                        for (int l = 1; l < 4; l++)
+                        {
+                            if (field[x_Neighbour, y_Neighbour + l] != null && field[x_Neighbour, y_Neighbour + l].owner == currentPlayer && end_Positive != false) // up (0,1)
+                                axes[k].Add(field[x_Neighbour, y_Neighbour + l]);
+                            else
+                                end_Positive = true;
+
+                            if (field[x_Neighbour, y_Neighbour - l] != null && field[x_Neighbour, y_Neighbour - l].owner == currentPlayer && end_Negative != false) // down (0,-1)
+                                axes[k].Add(field[x_Neighbour, y_Neighbour - l]);
+                            else
+                                end_Negative = true;
+
+                            if (end_Positive == true && end_Negative == true)
+                                break;
+
+                            if (axes[k].Count == 4)
+                            {
+                                Debug.Log(currentPlayer + " is the winner!");
+                            }
+                        }
                         break;
                     //Ascending
                     case 2:
+                        for (int l = 1; l < 4; l++)
+                        {
+                            if (field[x_Neighbour + l, y_Neighbour + l]  != null && field[x_Neighbour + l, y_Neighbour + l].owner == currentPlayer && end_Positive != false) // up & right (1,1)
+                                axes[k].Add(field[x_Neighbour + l, y_Neighbour + l]);
+                            else
+                                end_Positive = true;
+
+                            if (field[x_Neighbour - l, y_Neighbour - l] != null && field[x_Neighbour - l, y_Neighbour - l].owner == currentPlayer && end_Negative != false) // down & left (-1,-1)
+                                axes[k].Add(field[x_Neighbour - l, y_Neighbour - l]);
+                            else
+                                end_Negative = true;
+
+                            if (end_Positive == true && end_Negative == true)
+                                break;
+
+                            if (axes[k].Count == 4)
+                            {
+                                Debug.Log(currentPlayer + " is the winner!");
+                            }
+                        }
                         break;
                     //Descending
                     case 3:
+                        for (int l = 1; l < 4; l++)
+                        {
+                            if (field[x_Neighbour - l, y_Neighbour + l]  != null && field[x_Neighbour - l, y_Neighbour + l].owner == currentPlayer && end_Positive != false) // up & left (-1,1)
+                                axes[k].Add(field[x_Neighbour - l, y_Neighbour + l]);
+                            else
+                                end_Positive = true;
+
+                            if (field[x_Neighbour + l, y_Neighbour - l] != null && field[x_Neighbour + l, y_Neighbour - l].owner == currentPlayer && end_Negative != false) // down & right (1, -1)
+                                axes[k].Add(field[x_Neighbour + l, y_Neighbour - l]);
+                            else
+                                end_Negative = true;
+
+                            if (end_Positive == true && end_Negative == true)
+                                break;
+
+                            if (axes[k].Count == 4)
+                            {
+                                Debug.Log(currentPlayer + " is the winner!");
+                            }
+                        }
                         break;
                 }
             }
