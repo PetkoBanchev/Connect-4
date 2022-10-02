@@ -47,14 +47,12 @@ public class GameManager : MonoBehaviour
                     var block = Instantiate(fieldBlock, new Vector3(x, y, 0), Quaternion.identity);
                     block.transform.SetParent(fieldHolder);
                 }
-                if(y == field.GetLength(1))
+                if(y == field.GetLength(1)) //Instantiates the button on the top row of the field
                 {
                     int xOffset = x - 3;
                     var button = Instantiate(insertPluckButton);
                     button.transform.position = new Vector3(xOffset*60, y + 170, 0);
 
-                    Debug.Log((int)((button.transform.position.x / 60) - 3));
-                    
                     button.GetComponent<Button>().onClick.AddListener(()=> InsertPluck((int)((button.transform.position.x / 60) - 3)));
                     button.transform.SetParent(buttonHolder.transform, false);
                 }
@@ -64,7 +62,7 @@ public class GameManager : MonoBehaviour
 
     public void InsertPluck(int x)
     {
-        Debug.Log("func: " + x);
+
         if(columnFillCounter[x] < 6)
         {
             int y = columnFillCounter[x];
